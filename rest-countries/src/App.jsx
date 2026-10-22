@@ -1,83 +1,273 @@
-import React, { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
-import './index.css';
+import { useEffect, useState } from "react";
+import { Header } from "./components/Header";
+import { Navbar } from "./components/Navbar";
+import { CountryList } from "./components/CountryList";
+import { Footer } from "./components/Footer";
+import "./index.css";
+
+const API_URL = "https://countries.dev/countries";
+
+// countries.dev-ის მონაცემების ჩვენს კომპონენტებთან მორგება
+function normalizeCountry(country) {
+  const currencies = Array.isArray(country.currencies)
+    ? Object.fromEntries(
+        country.currencies.map((currency) => [currency.code, currency]),
+      )
+    : {};
+
+  const languages = Array.isArray(country.languages)
+    ? Object.fromEntries(
+        country.languages.map((language) => [
+          language.iso639_1 || language.name,
+          language.name,
+        ]),
+      )
+    : {};
+
+  const flagUrl =
+    country.flags?.svg ||
+    country.flags?.png ||
+    (typeof country.flag === "string" && country.flag.startsWith("http")
+      ? country.flag
+      : "");
+
+  return {
+    ...country,
+    cca3: country.alpha3Code,
+    name: {
+      common: country.name,
+      nativeName: country.nativeName
+        ? {
+            native: {
+              common: country.nativeName,
+            },
+          }
+        : {},
+    },
+    flags: {
+      svg: flagUrl,
+      png: country.flags?.png || flagUrl,
+    },
+    population: country.population ?? 0,
+    region: country.region || "",
+    subregion: country.subregion || "",
+    capital: country.capital ? [country.capital] : [],
+    tld: country.topLevelDomain || [],
+    currencies,
+    languages,
+    borders: country.borders || [],
+  };
+}
 
 function App() {
   const [countries, setCountries] = useState([]);
-  const [search, setSearch] = useState('');
-  const [region, setRegion] = useState('');
+  const [search, setSearch] = useState("");
+  const [region, setRegion] = useState("");
   const [darkMode, setDarkMode] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
-  
   useEffect(() => {
-    fetch('https://restcountries.com/v3.1/all')
-      .then((res) => res.json())
-      .then((data) => {
-        setCountries(data);
-        setLoading(false);
-      })
-      .catch((err) => console.error('Error fetching data:', err));
+    const controller = new AbortController();
+
+    async function fetchCountries() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(API_URL, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load countries.");
+        }
+
+        const result = await response.json();
+
+        if (!Array.isArray(result)) {
+          throw new Error("Unexpected API response.");
+        }
+
+        const normalizedCountries = result.map(normalizeCountry);
+        setCountries(normalizedCountries);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Countries API error:", err);
+          setError("ქვეყნების ჩატვირთვა ვერ მოხერხდა. სცადე თავიდან.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchCountries();
+
+    return () => controller.abort();
   }, []);
 
-  
+  useEffect(() => {
+    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
   const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.body.setAttribute('data-theme', !darkMode ? 'dark' : 'light');
+    setDarkMode((currentMode) => !currentMode);
   };
 
-  
   const filteredCountries = countries.filter((country) => {
-    const matchesSearch = country.name.common
+    const countryName = country.name.common || "";
+
+    const matchesSearch = countryName
       .toLowerCase()
-      .includes(search.toLowerCase());
-    const matchesRegion = region === '' || country.region === region;
+      .includes(search.trim().toLowerCase());
+
+    const matchesRegion = region === "" || country.region === region;
+
     return matchesSearch && matchesRegion;
   });
+
+  const borderCountries = selectedCountry
+    ? (selectedCountry.borders || [])
+        .map((code) => countries.find((country) => country.cca3 === code))
+        .filter(Boolean)
+    : [];
+
+  const selectCountry = (country) => {
+    setSelectedCountry(country);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goBack = () => {
+    setSelectedCountry(null);
+  };
 
   return (
     <div className="app">
       <Header darkMode={darkMode} toggleTheme={toggleTheme} />
-      <Navbar
-        search={search}
-        setSearch={setSearch}
-        region={region}
-        setRegion={setRegion}
-      />
 
-      <main className="container">
-        {loading ? (
-          <h2>Loading countries...</h2>
-        ) : (
-          <div className="countries-grid">
-            {filteredCountries.map((country) => (
-              <article key={country.cca3} className="country-card">
+      {selectedCountry ? (
+        <main className="container details-page">
+          <button className="back-button" type="button" onClick={goBack}>
+            ← Back
+          </button>
+
+          <div className="country-details">
+            <div className="details-flag">
+              {selectedCountry.flags.svg && (
                 <img
-                  src={country.flags.png}
-                  alt={country.name.common}
-                  loading="lazy"
+                  src={selectedCountry.flags.svg}
+                  alt={`Flag of ${selectedCountry.name.common}`}
                 />
-                <div className="card-body">
-                  <h2>{country.name.common}</h2>
+              )}
+            </div>
+
+            <div className="details-content">
+              <h2>{selectedCountry.name.common}</h2>
+
+              <div className="details-columns">
+                <div>
                   <p>
-                    <strong>Population:</strong>{' '}
-                    {country.population.toLocaleString()}
+                    <strong>Native Name:</strong>{" "}
+                    {Object.values(selectedCountry.name.nativeName || {})[0]
+                      ?.common || selectedCountry.name.common}
                   </p>
+
                   <p>
-                    <strong>Region:</strong> {country.region}
+                    <strong>Population:</strong>{" "}
+                    {selectedCountry.population.toLocaleString()}
                   </p>
+
                   <p>
-                    <strong>Capital:</strong>{' '}
-                    {country.capital ? country.capital[0] : 'N/A'}
+                    <strong>Region:</strong> {selectedCountry.region || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Sub Region:</strong>{" "}
+                    {selectedCountry.subregion || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Capital:</strong>{" "}
+                    {selectedCountry.capital.join(", ") || "N/A"}
                   </p>
                 </div>
-              </article>
-            ))}
+
+                <div>
+                  <p>
+                    <strong>Top Level Domain:</strong>{" "}
+                    {selectedCountry.tld.join(", ") || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Currencies:</strong>{" "}
+                    {Object.values(selectedCountry.currencies || {})
+                      .map((currency) => currency.name)
+                      .join(", ") || "N/A"}
+                  </p>
+
+                  <p>
+                    <strong>Languages:</strong>{" "}
+                    {Object.values(selectedCountry.languages || {}).join(
+                      ", ",
+                    ) || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-countries">
+                <strong>Border Countries:</strong>
+
+                <div className="border-list">
+                  {borderCountries.length > 0 ? (
+                    borderCountries.map((country) => (
+                      <button
+                        type="button"
+                        className="border-button"
+                        key={country.cca3}
+                        onClick={() => selectCountry(country)}
+                      >
+                        {country.name.common}
+                      </button>
+                    ))
+                  ) : (
+                    <span>None</span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </main>
+        </main>
+      ) : (
+        <>
+          <Navbar
+            search={search}
+            setSearch={setSearch}
+            region={region}
+            setRegion={setRegion}
+          />
+
+          <main>
+            {loading ? (
+              <p className="status-message">Loading countries...</p>
+            ) : error ? (
+              <div className="status-message">
+                <p>{error}</p>
+                <button type="button" onClick={() => window.location.reload()}>
+                  Try again
+                </button>
+              </div>
+            ) : (
+              <CountryList
+                countries={filteredCountries}
+                onSelectCountry={selectCountry}
+              />
+            )}
+          </main>
+        </>
+      )}
 
       <Footer />
     </div>
