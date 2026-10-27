@@ -107,35 +107,62 @@ img {
   margin-block: 40px;
 }
 
+/* Search */
 .search-box {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
+  max-width: 450px;
   min-width: 0;
-  max-width: 480px;
-  padding-inline: 24px;
-  border-radius: 5px;
+  height: 56px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: var(--element-color);
   box-shadow: var(--shadow);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: var(--focus-color);
+  box-shadow: 0 0 0 2px rgba(75, 156, 255, 0.12);
 }
 
 .search-icon {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-box input {
+  display: block;
+  flex: 1;
   width: 100%;
   min-width: 0;
-  padding-block: 18px;
+  height: 100%;
+  padding: 0;
   border: 0;
   outline: none;
   background: transparent;
   color: var(--text-color);
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.search-box input:focus,
+.search-box input:focus-visible {
+  border: 0;
+  outline: none;
+  box-shadow: none;
 }
 
 .search-box input::placeholder {
   color: var(--input-color);
+  opacity: 1;
 }
 
 .clear-search {
@@ -237,8 +264,7 @@ main {
 .theme-btn:focus-visible,
 .clear-search:focus-visible,
 button:focus-visible,
-select:focus-visible,
-input:focus-visible {
+select:focus-visible {
   outline: 2px solid var(--focus-color);
   outline-offset: 3px;
 }
