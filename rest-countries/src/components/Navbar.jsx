@@ -1,8 +1,10 @@
-import React from "react";
-
 export const Navbar = ({ search, setSearch, region, setRegion }) => {
+  const clearSearch = () => {
+    setSearch("");
+  };
+
   return (
-    <nav className="navbar container">
+    <nav className="navbar container" aria-label="Country search and filters">
       <div className="search-box">
         <span className="search-icon" aria-hidden="true">
           🔍
@@ -15,6 +17,16 @@ export const Navbar = ({ search, setSearch, region, setRegion }) => {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
+
+        {search.length > 0 && (
+          <button
+            className="clear-search"
+            type="button"
+            onClick={clearSearch}
+            aria-label="Clear search"
+            title="Clear search"
+          ></button>
+        )}
       </div>
 
       <div className="filter-box">
@@ -23,7 +35,7 @@ export const Navbar = ({ search, setSearch, region, setRegion }) => {
           value={region}
           onChange={(event) => setRegion(event.target.value)}
         >
-          <option value="">Filter by Region</option>
+          <option value="">All regions</option>
           <option value="Africa">Africa</option>
           <option value="Americas">Americas</option>
           <option value="Asia">Asia</option>
