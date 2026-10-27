@@ -8,6 +8,10 @@ import "./index.css";
 const API_URL = "https://countries.dev/countries";
 
 function normalizeCountry(country) {
+  const flagUrl = country.alpha2Code
+    ? `https://flagcdn.com/w320/${country.alpha2Code.toLowerCase()}.png`
+    : "";
+
   const currencies = Array.isArray(country.currencies)
     ? Object.fromEntries(
         country.currencies.map((currency) => [currency.code, currency]),
@@ -22,13 +26,6 @@ function normalizeCountry(country) {
         ]),
       )
     : {};
-
-  const flagUrl =
-    country.flags?.svg ||
-    country.flags?.png ||
-    (typeof country.flag === "string" && country.flag.startsWith("http")
-      ? country.flag
-      : "");
 
   return {
     ...country,
@@ -45,7 +42,7 @@ function normalizeCountry(country) {
     },
     flags: {
       svg: flagUrl,
-      png: country.flags?.png || flagUrl,
+      png: flagUrl,
     },
     population: country.population ?? 0,
     region: country.region || "",

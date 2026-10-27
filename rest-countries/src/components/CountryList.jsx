@@ -32,13 +32,17 @@ export const CountryList = ({ countries, onSelectCountry }) => {
               <div className="flag-box">
                 {flag ? (
                   <img
-                    src={flag}
-                    alt={`Flag of ${name}`}
-                    width="320"
-                    height="180"
-                    loading={index === 0 ? "eager" : "lazy"}
-                    fetchPriority={index === 0 ? "high" : "auto"}
+                    src={country.flags?.png || country.flags?.svg}
+                    alt={`Flag of ${country.name.common}`}
+                    loading="lazy"
                     decoding="async"
+                    onError={(event) => {
+                      console.error(
+                        "Flag failed to load:",
+                        country.name.common,
+                        event.currentTarget.src,
+                      );
+                    }}
                   />
                 ) : (
                   <span className="flag-placeholder">Flag unavailable</span>
