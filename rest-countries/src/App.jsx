@@ -116,17 +116,21 @@ function App() {
     setDarkMode((currentMode) => !currentMode);
   };
 
-  const filteredCountries = countries.filter((country) => {
-    const countryName = country.name.common || "";
+  const filteredCountries = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-    const matchesSearch = countryName
-      .toLowerCase()
-      .includes(search.trim().toLowerCase());
+    return countries.filter((country) => {
+      const countryName = country.name?.common || "";
 
-    const matchesRegion = region === "" || country.region === region;
+      const matchesSearch = countryName
+        .toLowerCase()
+        .includes(normalizedSearch);
 
-    return matchesSearch && matchesRegion;
-  });
+      const matchesRegion = region === "" || country.region === region;
+
+      return matchesSearch && matchesRegion;
+    });
+  }, [countries, search, region]);
 
   const borderCountries = selectedCountry
     ? (selectedCountry.borders || [])
