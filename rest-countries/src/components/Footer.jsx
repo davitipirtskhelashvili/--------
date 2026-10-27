@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 
 export const Footer = () => {
   return (
-    <footer className="footer">
+    <footer>
       <div className="container">
         <p>© 2026 REST Countries App. Built with React & Vite.</p>
       </div>
