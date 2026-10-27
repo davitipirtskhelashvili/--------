@@ -1,0 +1,15 @@
+
+# Around The World
+
+> A website for exploring countries around the world.
+
+## Features
+
+- Search for countries by name.
+- Filter countries by region.
+- View population, capital, languages, and currencies.
+- Explore country details and neighboring countries.
+
+## Website
+
+- [Home page](https://example.com/): Browse and search countries.
