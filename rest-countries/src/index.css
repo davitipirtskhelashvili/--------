@@ -231,7 +231,7 @@ footer {
   object-fit: cover;
 }
 
-/* Loading, errors and empty search results */
+
 .status-message,
 .empty-message {
   text-align: center;
@@ -245,7 +245,7 @@ footer {
   cursor: pointer;
 }
 
-/* Back button */
+
 .back-button {
   margin: 40px 0 60px;
   padding: 10px 28px;
@@ -263,7 +263,7 @@ footer {
   opacity: 0.8;
 }
 
-/* Country details */
+
 .country-details {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
