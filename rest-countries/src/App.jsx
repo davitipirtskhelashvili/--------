@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/Header";
 import { Navbar } from "./components/Navbar";
 import { CountryList } from "./components/CountryList";
@@ -7,7 +7,6 @@ import "./index.css";
 
 const API_URL = "https://countries.dev/countries";
 
-// countries.dev-ის მონაცემების ჩვენს კომპონენტებთან მორგება
 function normalizeCountry(country) {
   const currencies = Array.isArray(country.currencies)
     ? Object.fromEntries(
