@@ -129,11 +129,17 @@ function App() {
     });
   }, [countries, search, region]);
 
-  const borderCountries = selectedCountry
-    ? (selectedCountry.borders || [])
-        .map((code) => countries.find((country) => country.cca3 === code))
-        .filter(Boolean)
-    : [];
+  const borderCountries = useMemo(() => {
+    if (!selectedCountry) return [];
+
+    const countryMap = new Map(
+      countries.map((country) => [country.cca3, country]),
+    );
+
+    return (selectedCountry.borders || [])
+      .map((code) => countryMap.get(code))
+      .filter(Boolean);
+  }, [selectedCountry, countries]);
 
   const selectCountry = (country) => {
     setSelectedCountry(country);
