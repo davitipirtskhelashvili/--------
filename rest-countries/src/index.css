@@ -322,11 +322,11 @@ select:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.footer {
+footer {
   flex-shrink: 0;
   width: 100%;
   margin-top: auto;
-  padding-block: 24px;
+  padding-block: 20px;
   background: var(--element-color);
   box-shadow: var(--shadow);
   text-align: center;
@@ -334,7 +334,7 @@ select:focus-visible {
   line-height: 1.5;
 }
 
-.footer p {
+footer p {
   margin: 0;
 }
 
@@ -516,10 +516,6 @@ select:focus-visible {
 
   .card-body {
     padding: 24px;
-  }
-
-  .footer {
-    padding-block: 20px;
   }
 }
 
